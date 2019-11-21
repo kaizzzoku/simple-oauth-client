@@ -12,5 +12,17 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('start');
 });
+
+Route::get('redirect', 'Auth\LoginController@redirect')
+	->name('oauth.redirect');
+
+Route::get('login', 'Auth\LoginController@login')
+	->name('oauth.login');
+
+Route::get('start', 'Auth\LoginController@start')
+	->name('oauth.start');
+
+Route::get('users/{user}/profile', 'UserController@show')
+	->name('profile');
