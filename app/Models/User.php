@@ -22,4 +22,11 @@ class User extends Authenticatable
         'oauth_refresh_token',
         'oauth_expires_in',
     ];
+
+    /*|========| Accessors |=======|*/
+
+    public function getRefreshTokenAttribute()
+    {
+        return $this->oauth_refresh_token;
+    }
 }

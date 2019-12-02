@@ -12,7 +12,7 @@
 */
 
 Route::get('/', function () {
-    return redirect()->route('start');
+    return redirect()->route('oauth.start');
 });
 
 Route::get('redirect', 'Auth\LoginController@redirect')
@@ -24,5 +24,20 @@ Route::get('login', 'Auth\LoginController@login')
 Route::get('start', 'Auth\LoginController@start')
 	->name('oauth.start');
 
-Route::get('users/{user}/profile', 'UserController@show')
-	->name('profile');
+Route::group(
+	[
+		'middleware' => 'auth',
+		'as' => 'me.',
+		'prefix' => 'me',
+	],
+	function () {
+		Route::get('profile', 'UserController@show')
+			->name('profile');
+
+		Route::get('answers', 'UserController@answers')
+			->name('answers');
+
+		Route::get('questions', 'UserController@questions')
+			->name('questions');
+	}
+);

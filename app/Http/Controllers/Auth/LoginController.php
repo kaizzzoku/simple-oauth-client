@@ -36,7 +36,7 @@ class LoginController extends Controller
             'state' => $state,
         ]);
 
-        return redirect(env('OAUTH_AUTHORIZE_URI').'?'.$query);
+        return redirect(env('OAUTH_AUTHORIZE_URL').'?'.$query);
     }
 
     public function login(Request $request)
@@ -54,7 +54,7 @@ class LoginController extends Controller
             'expires_in' => $expires_in,
         ] = $this->getUserTokens($request->code);
 
-        $user = $this->createUser($access_token, $refresh_token, $expires_in);
+        $user = $this->createUser($access_token, $refresh_token);
 
         Cookie::queue(Cookie::make(
             'access_token',
@@ -65,7 +65,7 @@ class LoginController extends Controller
         event(new Registered($user));
         auth()->guard()->login($user);
 
-        return redirect()->route('profile', $user);
+        return redirect()->route('me.profile');
     }
 
     /*|========| Private functions |=======|*/
@@ -76,12 +76,12 @@ class LoginController extends Controller
      * @param string
      * @return array
     **/ 
-    public function getUserTokens(string $auth_code)
+    private function getUserTokens(string $auth_code)
     {
 
         $response = $this->client->request(
             'POST',
-            env('GET_OAUTH_ACCESS_TOKEN_URI'),
+            env('ACCESS_TOKEN_URL'),
             [
                 'form_params' => [
                     'grant_type' => 'authorization_code',
@@ -102,10 +102,9 @@ class LoginController extends Controller
         ];
     }
 
-    public function createUser(
+    private function createUser(
         string $access_token,
-        string $refresh_token,
-        string $expires_in
+        string $refresh_token
     )
     {
         $user_info = json_decode((string) $this->client->request(
@@ -121,7 +120,6 @@ class LoginController extends Controller
         $user = (new User)->create([
             'name' => $user_info['name'],
             'oauth_refresh_token' => $refresh_token,
-            'oauth_expires_in' => $expires_in,
         ]);
 
         return $user;
